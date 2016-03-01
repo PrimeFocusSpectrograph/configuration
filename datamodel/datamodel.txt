@@ -109,16 +109,22 @@ N.b. the restriction to filenames of the form 4 letters followed by 8 decimal di
 
 Calibration products (i.e. processed flats/biases/darks ready to be used in processing)
 
-   "pfsFlat-%06d-%1d%1s.fits" % (visit0, spectrograph, arm)
-   "pfsBias-%06d-%1d%1s.fits" % (visit0, spectrograph, arm)
-   "pfsDark-%06d-%1d%1s.fits" % (visit0, spectrograph, arm)
+   "pfsFlat-%s-%1d-%1d%1s.fits" % (calibDate, calibVersion, spectrograph, arm)
+   "pfsBias-%s-%1d-%1d%1s.fits" % (calibDate, calibVersion, spectrograph, arm)
+   "pfsDark-%s-%1d-%1d%1s.fits" % (calibDate, calibVersion, spectrograph, arm)
 
 (While theoretically we don't need to distinguish between the r and m chips, it's simpler to be
 consistent, so we will have 16, not 12, biases/darks for the complete spectrograph)
 
-The visit is replaced by visit0, the first visit for which these flats/biases/darks are valid; in general
-there will be many files for each (spectrograph, arm) but with different values of visit0.  Note that we
-don't know the upper range of validity when these files are created, so it cannot be encoded in the filename.
+The calibDate is an ISO date of the form
+    YYYY-MM-DD
+giving the average date that the input frames (e.g. flats) were taken.  Because it's theoretically possible to
+create multiple versions of calibration files with the same calibDate we reserve a calibVersion field (but it
+is currently expected to alwayw be 0).
+
+In general there will be many files for each (spectrograph, arm) but with different values of
+calibDate/calibVersion.  Note that we don't know the upper range of validity when these files are created, so
+it cannot be encoded in the filename.
 
 Single extension fits files of size NCOLUMN*NROW
 
@@ -126,9 +132,9 @@ Single extension fits files of size NCOLUMN*NROW
 
 The positions and widths of fiber traces in the 2-D flatfieldimages.
 
-  "pfsFiberTrace-%06d-%1d%1s.fits" % (visit0, spectrograph, arm)
+  "pfsFiberTrace-%s-%1d-%1d%1s.fits" % (calibDate, calibVersion, spectrograph, arm)
 
-Note that visit0 is defined under "Calibration products"
+Note that calibDate and calibVersion are defined under "Calibration products"
 
 Format TBD.
 
@@ -306,15 +312,15 @@ Note that the wavelength need not be uniformly sampled.
  pfsConfig-0xad349fe2.fits
 	The fiber and targetting information for the PFI configuration with hash 0xad349fe2
 
- pfsFlat-000333-2m.fits
-	Flat for spectrograph 2, medium resolution arm, valid for 333 <= visit < ??
- pfsBias-000333-1r.fits
+ pfsFlat-2018-10-21-0-2m.fits
+	Flat for spectrograph 2, medium resolution arm, valid starting the 5th of February, 2018
+ pfsBias-2018-10-21-0-1r.fits
 	Bias for spectrograph 1, red arm
- pfsBias-000333-1m.fits
-	Bias for spectrograph 1, medium resolution arm (identical to pfsBias-000333-1r.fits)
- pfsDark-000333-3b.fits
+ pfsBias-2018-10-21-0-1m.fits
+	Bias for spectrograph 1, medium resolution arm (identical to pfsBias-2018-01-21-0-1r.fits)
+ pfsDark-2018-10-21-0-3b.fits
 	Dark for spectrograph 3, blue arm
- pfsFiberTrace-000333-2n.fits
+ pfsFiberTrace-2018-01-21-0-2n.fits
 	Fiber traces for spectrograph 2, IR arm
 
  pfsArm-000666-1b.fits
@@ -396,7 +402,7 @@ The ISR-extracted H4RG images will be no bigger than
 
 	Define format of pfsPSF files.  Choosing a better name is probably hopeless 
 
-	Need a DB (as well as the butler) to map visit to visit0 for calibration products
+	Need a DB (as well as the butler) to map visit to calibDate/calibVersion for calibration products
 
 	Do we want to model the sky over the entire exposure?  I put in a place holder that is
 	per spectrograph/arm but it isn't obvious that this is correct.  E.g. there's spatial
